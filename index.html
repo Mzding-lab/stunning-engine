@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>WhatsApp消息管理系统</title>
+  <style>
+    body { font-family: Arial; max-width: 1000px; margin: 20px auto; padding: 20px; }
+    .account-list { display: flex; gap: 10px; margin-bottom: 20px; }
+    .account { padding: 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+    .account.active { background: #3498db; color: white; }
+    form { background: #f8f9fa; padding: 20px; border-radius: 8px; }
+    input, textarea { width: 100%; margin: 10px 0; padding: 8px; }
+    button { background: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>📱 WhatsApp消息管理系统</h1>
+
+  <!-- 账号管理 -->
+  <div>
+    <h2>账号列表</h2>
+    <div class="account-list" id="accountList"></div>
+    <button onclick="location.href='/add-account.html'">➕ 添加新账号</button>
+  </div>
+
+  <!-- 发送消息表单 -->
+  <form onsubmit="sendMessage(event)">
+    <input type="text" name="phone" placeholder="输入客户号码（例：8618850970823）" required>
+    <textarea name="content" placeholder="输入消息内容" rows="4" required></textarea>
+    <button type="submit">🚀 发送消息</button>
+  </form>
+
+  <!-- 消息记录 -->
+  <div id="messageList"></div>
+
+  <script>
+    // 加载账号列表
+    async function loadAccounts() {
+      const res = await fetch('/accounts');
+      const accounts = await res.json();
+      const html = accounts.map(account => `
+        <div class="account ${account.is_active ? 'active' : ''}" 
+             onclick="switchAccount(${account.id})">
+          ${account.account_name} (${account.phone_number})
+        </div>
+      `).join('');
+      document.getElementById('accountList').innerHTML = html;
+    }
+
+    // 切换账号
+    async function switchAccount(accountId) {
+      await fetch('/accounts/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId })
+      });
+      loadAccounts();
+    }
+
+    // 发送消息
+    async function sendMessage(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        phone: formData.get('phone'),
+        content: formData.get('content')
+      };
+
+      try {
+        const res = await fetch('/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.text();
+        alert(result);
+      } catch (error) {
+        alert('发送失败：' + error.message);
+      }
+    }
+
+    // 初始化加载
+    loadAccounts();
+  </script>
+</body>
+</html>
