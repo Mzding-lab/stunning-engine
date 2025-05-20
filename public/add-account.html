@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>添加新账号</title>
+  <style>
+    body { font-family: Arial; max-width: 600px; margin: 20px auto; padding: 20px; }
+    form { background: #f8f9fa; padding: 20px; border-radius: 8px; }
+    input { width: 100%; margin: 10px 0; padding: 8px; }
+    button { background: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>➕ 添加新账号</h1>
+  <form onsubmit="addAccount(event)">
+    <input type="text" name="accountName" placeholder="账号名称（例：客服团队A）" required>
+    <input type="text" name="phoneNumber" placeholder="WhatsApp 号码（例：8618850970823）" required>
+    <input type="text" name="apiKey" placeholder="Gupshup API 密钥" required>
+    <button type="submit">提交</button>
+  </form>
+
+  <script>
+    async function addAccount(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        accountName: formData.get('accountName'),
+        phoneNumber: formData.get('phoneNumber'),
+        apiKey: formData.get('apiKey')
+      };
+
+      try {
+        const res = await fetch('/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.text();
+        alert(result);
+        window.location.href = '/';
+      } catch (error) {
+        alert('添加失败：' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
